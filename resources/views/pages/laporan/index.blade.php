@@ -69,7 +69,7 @@
                    @forelse($peminjamanHariIni as $item)
     <tr>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ date('H:i', strtotime($item->tanggal_peminjaman)) }}
+            {{ $item->created_at ? $item->created_at->format('H:i') : '-' }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {{ $item->user->username ?? 'N/A' }}
@@ -120,7 +120,7 @@
                    @forelse($pengembalianHariIni as $item)
     <tr>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ date('H:i', strtotime($item->tanggal_kembali_aktual)) }}
+            {{ $item->created_at ? $item->created_at->format('H:i') : '-' }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {{ $item->peminjaman->user->username ?? 'N/A' }}
