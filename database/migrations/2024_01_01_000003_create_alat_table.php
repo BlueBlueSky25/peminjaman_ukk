@@ -9,8 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Buat ENUM type untuk kondisi_alat
-        DB::statement("CREATE TYPE kondisi_alat AS ENUM ('baik', 'rusak', 'hilang')");
+        // Buat ENUM type untuk kondisi_alat (abaikan jika sudah ada)
+        DB::statement("DO $$ BEGIN CREATE TYPE kondisi_alat AS ENUM ('baik', 'rusak', 'hilang'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+
+        if (Schema::hasTable('alat')) return;
 
         Schema::create('alat', function (Blueprint $table) {
             $table->increments('alat_id');

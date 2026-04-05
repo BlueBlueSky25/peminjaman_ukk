@@ -8,6 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('kategori')) return;
+
         Schema::create('kategori', function (Blueprint $table) {
             $table->increments('kategori_id');
             $table->string('nama_kategori', 100)->unique();

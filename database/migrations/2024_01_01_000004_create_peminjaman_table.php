@@ -9,8 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Buat ENUM type untuk status_peminjaman
-        DB::statement("CREATE TYPE status_peminjaman AS ENUM ('menunggu', 'disetujui', 'ditolak', 'dikembalikan', 'sebagian_kembali')");
+        // Buat ENUM type untuk status_peminjaman (abaikan jika sudah ada)
+        DB::statement("DO $$ BEGIN CREATE TYPE status_peminjaman AS ENUM ('menunggu', 'disetujui', 'ditolak', 'dikembalikan', 'sebagian_kembali'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+
+        if (Schema::hasTable('peminjaman')) return;
 
         Schema::create('peminjaman', function (Blueprint $table) {
             $table->increments('peminjaman_id');

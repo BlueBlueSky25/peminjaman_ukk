@@ -8,6 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('log_aktivitas')) return;
+
         Schema::create('log_aktivitas', function (Blueprint $table) {
             $table->increments('log_id');
             $table->unsignedInteger('user_id')->nullable();
