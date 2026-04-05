@@ -10,9 +10,9 @@ class Alat extends Model
     use HasFactory;
 
     protected $table = 'alat';
-    protected $primaryKey = 'alat_id'; // Tambahkan ini
-    public $incrementing = true; // Tambahkan ini
-    protected $keyType = 'int'; // Tambahkan ini
+    protected $primaryKey = 'alat_id'; 
+    public $incrementing = true; 
+    protected $keyType = 'int'; 
 
     protected $fillable = [
         'kategori_id',
@@ -21,6 +21,8 @@ class Alat extends Model
         'kode_alat',
         'stok_total',
         'stok_tersedia',
+        'stok_rusak',      
+        'stok_hilang', 
         'kondisi',
         'lokasi',
     ];

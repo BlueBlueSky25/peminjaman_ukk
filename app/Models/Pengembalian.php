@@ -10,9 +10,9 @@ class Pengembalian extends Model
     use HasFactory;
 
     protected $table = 'pengembalian';
-    protected $primaryKey = 'pengembalian_id'; // Tambahkan ini
-    public $incrementing = true; // Tambahkan ini
-    protected $keyType = 'int'; // Tambahkan ini
+    protected $primaryKey = 'pengembalian_id'; 
+    public $incrementing = true; 
+    protected $keyType = 'int'; 
 
     protected $fillable = [
         'peminjaman_id',
@@ -22,6 +22,9 @@ class Pengembalian extends Model
         'tarif_denda_per_hari',
         'total_denda',
         'status_denda',
+        'tanggal_bayar_denda',         
+        'diverifikasi_oleh',           
+        'keterangan_pembayaran', 
         'keterangan',
     ];
 
@@ -39,5 +42,9 @@ class Pengembalian extends Model
     public function getRouteKeyName()
     {
     return 'pengembalian_id';
+    }
+    public function verifikator()
+    {
+    return $this->belongsTo(User::class, 'diverifikasi_oleh', 'user_id');
     }
 }

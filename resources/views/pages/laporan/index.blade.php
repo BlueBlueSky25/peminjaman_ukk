@@ -66,28 +66,34 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($peminjamanHariIni as $item)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ date('H:i', strtotime($item['tgl_pinjam'])) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item['peminjam'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item['alat'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item['jumlah'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {{ date('d/m/Y', strtotime($item['jatuh_tempo'])) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {{ session('username', 'Administrator') }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                Tidak ada peminjaman pada tanggal ini.
-                            </td>
-                        </tr>
-                    @endforelse
+                   @forelse($peminjamanHariIni as $item)
+    <tr>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ date('H:i', strtotime($item->tanggal_peminjaman)) }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ $item->user->username ?? 'N/A' }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{ $item->alat->nama_alat ?? 'N/A' }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ $item->jumlah }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{ date('d/m/Y', strtotime($item->tanggal_kembali_rencana)) }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{ $item->disetujui_oleh ?? 'Administrator' }}
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+            Tidak ada peminjaman pada tanggal ini.
+        </td>
+    </tr>
+@endforelse
                 </tbody>
             </table>
         </div>
@@ -111,47 +117,51 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($pengembalianHariIni as $item)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ date('H:i', strtotime($item['tgl_kembali'])) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item['peminjam'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item['alat'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs rounded-full 
-                                    @if($item['kondisi'] == 'Baik') bg-green-100 text-green-800
-                                    @elseif($item['kondisi'] == 'Rusak Ringan') bg-yellow-100 text-yellow-800
-                                    @else bg-red-100 text-red-800
-                                    @endif">
-                                    {{ $item['kondisi'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($item['terlambat'] > 0)
-                                    <span class="text-red-600">{{ $item['terlambat'] }} hari</span>
-                                @else
-                                    <span class="text-green-600">Tepat waktu</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                @if($item['denda'] > 0)
-                                    <span class="text-red-600">Rp {{ number_format($item['denda'], 0, ',', '.') }}</span>
-                                @else
-                                    <span class="text-gray-600">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {{ session('username', 'Administrator') }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                                Tidak ada pengembalian pada tanggal ini.
-                            </td>
-                        </tr>
-                    @endforelse
+                   @forelse($pengembalianHariIni as $item)
+    <tr>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ date('H:i', strtotime($item->tanggal_kembali_aktual)) }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ $item->peminjaman->user->username ?? 'N/A' }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{ $item->peminjaman->alat->nama_alat ?? 'N/A' }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 text-xs rounded-full 
+                @if($item->kondisi_alat == 'baik') bg-green-100 text-green-800
+                @elseif($item->kondisi_alat == 'rusak') bg-yellow-100 text-yellow-800
+                @else bg-red-100 text-red-800
+                @endif">
+                {{ ucfirst($item->kondisi_alat) }}
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm">
+            @if($item->keterlambatan_hari > 0)
+                <span class="text-red-600">{{ $item->keterlambatan_hari }} hari</span>
+            @else
+                <span class="text-green-600">Tepat waktu</span>
+            @endif
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            @if($item->total_denda > 0)
+                <span class="text-red-600">Rp {{ number_format($item->total_denda, 0, ',', '.') }}</span>
+            @else
+                <span class="text-gray-600">-</span>
+            @endif
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+            {{ session('username', 'Administrator') }}
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+            Tidak ada pengembalian pada tanggal ini.
+        </td>
+    </tr>
+@endforelse
                 </tbody>
             </table>
         </div>

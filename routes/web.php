@@ -109,7 +109,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/pengembalian/{pengembalian}', [PengembalianController::class, 'destroy'])
         ->name('pengembalian.destroy')
         ->middleware('role:admin');
+
+    Route::post('/pengembalian/{pengembalian}/verifikasi', [PengembalianController::class, 'verifikasiPembayaran'])
+        ->name('pengembalian.verifikasi')
+        ->middleware('role:admin,petugas');
+    
+    Route::delete('/pengembalian/{pengembalian}', [PengembalianController::class, 'destroy'])
+        ->name('pengembalian.destroy')
+        ->middleware('role:admin');
 });
+   
 
 // ============================================================
 // USER MANAGEMENT ROUTES - Admin Only

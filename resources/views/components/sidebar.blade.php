@@ -43,7 +43,7 @@
         @endif
 
         <!-- Pengembalian - Semua Role -->
-        @if(in_array($userLevel, ['admin', 'petugas', 'peminjam']))
+        @if(in_array($userLevel, ['admin', 'petugas']))
             <a href="{{ route('pengembalian.index') }}" class="flex items-center space-x-3 px-4 py-3 {{ request()->routeIs('pengembalian.*') ? 'bg-gray-100 text-gray-800' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg">
                 <i class="fas fa-undo {{ request()->routeIs('pengembalian.*') ? 'text-blue-500' : 'text-gray-400' }}"></i>
                 <span {{ request()->routeIs('pengembalian.*') ? 'class=font-medium' : '' }}>Pengembalian</span>

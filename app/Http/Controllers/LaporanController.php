@@ -14,7 +14,7 @@ class LaporanController extends Controller
         $tanggal = $request->input('tanggal', date('Y-m-d'));
 
         // Peminjaman hari ini
-        $peminjamanHariIni = Peminjaman::with(['user', 'alat', 'petugas'])
+        $peminjamanHariIni = Peminjaman::with(['user', 'alat'])
             ->whereDate('tanggal_peminjaman', $tanggal)
             ->get();
 
@@ -41,12 +41,10 @@ class LaporanController extends Controller
     {
         $tanggal = $request->input('tanggal', date('Y-m-d'));
 
-        // Peminjaman hari ini
-        $peminjamanHariIni = Peminjaman::with(['user', 'alat', 'petugas'])
+        $peminjamanHariIni = Peminjaman::with(['user', 'alat'])
             ->whereDate('tanggal_peminjaman', $tanggal)
             ->get();
 
-        // Pengembalian hari ini
         $pengembalianHariIni = Pengembalian::with(['peminjaman.user', 'peminjaman.alat'])
             ->whereDate('tanggal_kembali_aktual', $tanggal)
             ->get();

@@ -22,11 +22,11 @@
                 @endif
                 
                 <!-- Info Credentials -->
-                <div class="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-sm">
+                <!-- <div class="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-sm">
                     <p><strong>Demo Login:</strong></p>
                     <p>Username: admin</p>
                     <p>Password: admin123</p>
-                </div>
+                </div> -->
                 
                 <form method="POST" action="{{ route('login.post') }}">
                     @csrf
