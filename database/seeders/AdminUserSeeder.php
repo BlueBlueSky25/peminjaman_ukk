@@ -10,12 +10,20 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
-            'username'   => 'admin',
-            'password'   => Hash::make('admin123'),
-            'level'      => 'admin',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $exists = DB::table('users')->where('username', 'admin')->exists();
+
+        if (!$exists) {
+            DB::table('users')->insert([
+                'username'   => 'admin',
+                'password'   => Hash::make('admin123'),
+                'level'      => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $this->command->info('Admin user berhasil dibuat!');
+        } else {
+            $this->command->info('Admin user sudah ada, skip.');
+        }
     }
 }
