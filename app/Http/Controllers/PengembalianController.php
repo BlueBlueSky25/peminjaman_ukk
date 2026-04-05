@@ -58,6 +58,10 @@ class PengembalianController extends Controller
     
     $totalKembali = $validated['kondisi_baik'] + $validated['kondisi_rusak'] + $validated['kondisi_hilang'];
 
+    if ($totalKembali === 0) {
+        return back()->withErrors(['kondisi_baik' => 'Minimal ada 1 item yang dikembalikan']);
+    }
+
     if ($totalKembali > $peminjaman->jumlah) {
         return back()->withErrors(['kondisi_baik' => 'Total kembali melebihi jumlah pinjaman']);
     }
@@ -70,20 +74,24 @@ class PengembalianController extends Controller
     $totalDenda = $keterlambatan * $tarifDenda * $totalKembali;
 
     DB::transaction(function () use ($validated, $peminjaman, $keterlambatan, $tarifDenda, $totalDenda, $totalKembali) {
-        // ✅ TENTUKAN KONDISI MAYORITAS
-        $kondisiAlat = 'baik'; // Default
-        if ($validated['kondisi_rusak'] > 0) {
+        // TENTUKAN KONDISI MAYORITAS
+        $kondisiAlat = 'baik';
+        if ($validated['kondisi_hilang'] > 0) {
+            $kondisiAlat = 'hilang';
+        } elseif ($validated['kondisi_rusak'] > 0) {
             $kondisiAlat = 'rusak';
         }
-        if ($validated['kondisi_hilang'] > 0) {
-            $kondisiAlat = 'hilang'; // Prioritas tertinggi
+
+        // ✅ Validasi enum sebelum insert
+        $validKondisi = ['baik', 'rusak', 'hilang'];
+        if (!in_array($kondisiAlat, $validKondisi)) {
+            throw new \Exception('Kondisi alat tidak valid');
         }
 
-        // ✅ 1 TRANSAKSI UNTUK SEMUA KONDISI
         Pengembalian::create([
             'peminjaman_id' => $validated['peminjaman_id'],
             'tanggal_kembali_aktual' => $validated['tanggal_kembali_aktual'],
-            'kondisi_alat' => $kondisiAlat, // ✅ Gunakan enum yang valid
+            'kondisi_alat' => $kondisiAlat,
             'keterlambatan_hari' => $keterlambatan,
             'tarif_denda_per_hari' => $tarifDenda,
             'total_denda' => $totalDenda,
@@ -105,7 +113,6 @@ class PengembalianController extends Controller
             $peminjaman->update(['status' => 'sebagian_kembali', 'jumlah' => $sisaPinjam]);
         }
 
-        //  UPDATE STOK SESUAI KONDISI
         $peminjaman->alat->increment('stok_tersedia', $validated['kondisi_baik']);
         $peminjaman->alat->increment('stok_rusak', $validated['kondisi_rusak']);
         $peminjaman->alat->increment('stok_hilang', $validated['kondisi_hilang']);
@@ -113,13 +120,14 @@ class PengembalianController extends Controller
 
     LogAktivitas::create([
         'user_id' => Auth::id(),
-        'aktivitas' => 'Proses Pengembalian - ' . $peminjaman->kode_peminjaman . ' (Baik:' . $validated['kondisi_baik'] . ' Rusak:' . $validated['kondisi_rusak'] . ' Hilang:' . $validated['kondisi_hilang'] . ')',
+        'aktivitas' => 'Proses Pengembalian - ' . $peminjaman->kode_peminjaman,
         'modul' => 'Pengembalian',
         'timestamp' => now(),
     ]);
 
     return redirect()->route('pengembalian.index')->with('success', 'Pengembalian berhasil diproses!');
 }
+
     // UPDATE: Verifikasi pembayaran denda
     public function verifikasiPembayaran(Request $request, $id)
     {

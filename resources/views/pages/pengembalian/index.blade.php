@@ -399,11 +399,9 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran</label>
                     <select name="metode_pembayaran" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">Pilih Metode</option>
-                       
+                        <option value="cash" selected>Cash</option>
                     </select>
                 </div>
 
@@ -428,7 +426,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
     // Modal Proses Pengembalian
     function openModal() {
         document.getElementById('pengembalianModal').classList.remove('hidden');
@@ -462,6 +460,8 @@
         const selected = peminjamanSelect.options[peminjamanSelect.selectedIndex];
         const jumlahPinjam = parseInt(selected.getAttribute('data-jumlah')) || 0;
         
+        if (!selected.getAttribute('data-user')) return; // Skip jika placeholder
+        
         // Display peminjaman info
         const user = selected.getAttribute('data-user');
         const alat = selected.getAttribute('data-alat');
@@ -473,9 +473,9 @@
         const hilang = parseInt(kondisiHilang.value) || 0;
         const total = baik + rusak + hilang;
 
-        // ✅ VALIDASI & ENABLE/DISABLE SUBMIT
+        // VALIDASI & ENABLE/DISABLE SUBMIT
         let isValid = true;
-        if (total > jumlahPinjam) {
+        if (total > jumlahPinjam && jumlahPinjam > 0) {
             totalKembaliText.innerHTML = `<span class="text-red-600 font-semibold">❌ Total (${total}) melebihi jumlah pinjam (${jumlahPinjam})</span>`;
             isValid = false;
         } else if (total < jumlahPinjam && total > 0) {
@@ -498,12 +498,90 @@
     kondisiRusak.addEventListener('input', updateKondisiInfo);
     kondisiHilang.addEventListener('input', updateKondisiInfo);
 
+    // ✅ FIX: Prevent modal click from blocking tab buttons
     document.getElementById('pengembalianModal').addEventListener('click', function(event) {
-        if (event.target === this) {
+        if (event.target === this || event.target.id === 'pengembalianModal') {
             closeModal();
         }
     });
 
-    // [Sisa script tab switching & verifikasi tetap sama...]
+    // ✅ FIX: Stop propagation saat klik di form
+    document.querySelector('#pengembalianModal form')?.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // ✅ TAB SWITCHING - Ini yang hilang!
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Update button styles
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                b.classList.add('text-gray-600');
+            });
+            
+            this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            this.classList.remove('text-gray-600');
+        });
+    });
+
+    // ✅ MODAL VERIFIKASI PEMBAYARAN
+    function openVerifikasiModal(pengembalianId, totalDenda) {
+        const form = document.getElementById('verifikasiForm');
+        form.action = `/pengembalian/${pengembalianId}/verifikasi`;
+        document.getElementById('total_denda_display').value = `Rp ${parseInt(totalDenda).toLocaleString('id-ID')}`;
+        document.getElementById('jumlah_bayar').value = totalDenda;
+        document.getElementById('jumlah_bayar').max = totalDenda;
+        document.getElementById('verifikasiModal').classList.remove('hidden');
+        
+        updateKeteranganBayar(totalDenda);
+    }
+
+    function closeVerifikasiModal() {
+        document.getElementById('verifikasiModal').classList.add('hidden');
+    }
+
+    function updateKeteranganBayar(totalDenda) {
+        const jumlahInput = document.getElementById('jumlah_bayar');
+        const keterangan = document.getElementById('keterangan_bayar');
+        
+        // Remove old listener dengan clone
+        const newInput = jumlahInput.cloneNode(true);
+        jumlahInput.parentNode.replaceChild(newInput, jumlahInput);
+        
+        newInput.addEventListener('input', function() {
+            const jumlah = parseInt(this.value) || 0;
+            if (jumlah < totalDenda) {
+                keterangan.textContent = `⚠ Kurang: Rp ${(totalDenda - jumlah).toLocaleString('id-ID')}`;
+                keterangan.className = 'text-xs text-orange-600 mt-1';
+            } else if (jumlah > totalDenda) {
+                keterangan.textContent = `✓ Kembali: Rp ${(jumlah - totalDenda).toLocaleString('id-ID')}`;
+                keterangan.className = 'text-xs text-green-600 mt-1';
+            } else {
+                keterangan.textContent = '✓ Pas';
+                keterangan.className = 'text-xs text-green-600 mt-1';
+            }
+        });
+    }
+
+    // ✅ VERIFIKASI MODAL CLICK
+    document.getElementById('verifikasiModal')?.addEventListener('click', function(event) {
+        if (event.target === this || event.target.id === 'verifikasiModal') {
+            closeVerifikasiModal();
+        }
+    });
+
+    document.querySelector('#verifikasiModal form')?.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
 </script>
 @endsection
