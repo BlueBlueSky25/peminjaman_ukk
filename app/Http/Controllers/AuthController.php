@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogAktivitas;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -20,7 +21,11 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // PERBAIKAN: Case-insensitive login
+        $user = User::whereRaw('LOWER(username) = ?', [strtolower($credentials['username'])])->first();
+
+        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            Auth::login($user);
             $request->session()->regenerate();
 
             // Log aktivitas
