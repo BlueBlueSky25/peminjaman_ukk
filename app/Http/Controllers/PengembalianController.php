@@ -48,15 +48,25 @@ class PengembalianController extends Controller
     $validated = $request->validate([
         'peminjaman_id' => 'required|exists:peminjaman,peminjaman_id',
         'tanggal_kembali_aktual' => 'required|date',
-        'kondisi_baik' => 'required|integer|min:0',
-        'kondisi_rusak' => 'required|integer|min:0',
-        'kondisi_hilang' => 'required|integer|min:0',
+        'kondisi_baik' => 'required|numeric|min:0',
+        'kondisi_rusak' => 'required|numeric|min:0',
+        'kondisi_hilang' => 'required|numeric|min:0',
         'keterangan' => 'nullable|string',
     ]);
+
+    // Paksa jadi integer
+    $validated['kondisi_baik'] = (int) $validated['kondisi_baik'];
+    $validated['kondisi_rusak'] = (int) $validated['kondisi_rusak'];
+    $validated['kondisi_hilang'] = (int) $validated['kondisi_hilang'];
+    
 
     $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
     
     $totalKembali = $validated['kondisi_baik'] + $validated['kondisi_rusak'] + $validated['kondisi_hilang'];
+
+
+   
+    
 
     if ($totalKembali === 0) {
         return back()->withErrors(['kondisi_baik' => 'Minimal ada 1 item yang dikembalikan']);
