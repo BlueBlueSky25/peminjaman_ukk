@@ -266,84 +266,88 @@
     </div>
 
     <!-- Modal Proses Pengembalian -->
-    <div id="pengembalianModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-900">Proses Pengembalian</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
+<div id="pengembalianModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Proses Pengembalian</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form action="{{ route('pengembalian.store') }}" method="POST">
+            @csrf
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Peminjaman</label>
+                <select name="peminjaman_id" id="peminjaman_select" required 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="">Pilih Peminjaman</option>
+                    @foreach($peminjamanBelumSelesai as $pinjam)
+                        <option value="{{ $pinjam->peminjaman_id }}" 
+                            data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
+                            data-user="{{ $pinjam->user->username }}"
+                            data-alat="{{ $pinjam->alat->nama_alat }}"
+                            data-jumlah="{{ $pinjam->jumlah }}">
+                            {{ $pinjam->user->username }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
+                        </option>
+                    @endforeach
+                </select>
+                <p id="info_peminjaman" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+
+            <!-- Tanggal Kembali -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kembali</label>
+                <input type="date" id="tanggal_kembali" name="tanggal_kembali_aktual" required 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    value="{{ date('Y-m-d') }}">
+                <p id="info_keterlambatan" class="text-xs mt-1"></p>
+            </div>
+
+            <!-- Breakdown Kondisi per Item -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Kondisi Pengembalian</label>
+                <div class="space-y-2">
+                    <div>
+                        <label class="text-xs text-gray-600">Baik</label>
+                        <input type="number" name="kondisi_baik" id="kondisi_baik" min="0" value="0" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Rusak</label>
+                        <input type="number" name="kondisi_rusak" id="kondisi_rusak" min="0" value="0" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Hilang</label>
+                        <input type="number" name="kondisi_hilang" id="kondisi_hilang" min="0" value="0" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                </div>
+                <p id="total_kembali" class="text-xs text-blue-600 mt-2 font-semibold"></p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+                <textarea name="keterangan" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Catatan tambahan (opsional)"></textarea>
+            </div>
+
+            <div class="flex space-x-2">
+                <button type="submit" 
+                    class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition">
+                    Proses
+                </button>
+                <button type="button" onclick="closeModal()" 
+                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 rounded-lg transition">
+                    Batal
                 </button>
             </div>
-            
-            <form action="{{ route('pengembalian.store') }}" method="POST">
-                @csrf
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Peminjaman</label>
-                    <select name="peminjaman_id" id="peminjaman_select" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">Pilih Peminjaman</option>
-                        @foreach($peminjamanBelumSelesai as $pinjam)
-                            <option value="{{ $pinjam->peminjaman_id }}" 
-                                data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
-                                data-user="{{ $pinjam->user->username }}"
-                                data-alat="{{ $pinjam->alat->nama_alat }}"
-                                data-jumlah="{{ $pinjam->jumlah }}">
-                                {{ $pinjam->user->username }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x) - {{ $pinjam->tanggal_peminjaman->format('d/m/Y') }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <p id="info_peminjaman" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Dikembalikan</label>
-                    <input type="number" id="jumlah_kembali" name="jumlah_kembali" min="1" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Masukkan jumlah item yang dikembalikan">
-                    <p id="info_jumlah" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kembali</label>
-                    <input type="date" id="tanggal_kembali" name="tanggal_kembali_aktual" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="{{ date('Y-m-d') }}">
-                    <p id="info_keterlambatan" class="text-xs mt-1"></p>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kondisi Alat</label>
-                    <select name="kondisi_alat" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">Pilih Kondisi</option>
-                        <option value="baik">Baik</option>
-                        <option value="rusak">Rusak</option>
-                        <option value="hilang">Hilang</option>
-                    </select>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                    <textarea name="keterangan" rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Catatan tambahan (opsional)"></textarea>
-                </div>
-
-                <div class="flex space-x-2">
-                    <button type="submit" 
-                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition">
-                        Proses
-                    </button>
-                    <button type="button" onclick="closeModal()" 
-                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 rounded-lg transition">
-                        Batal
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
-
+</div>
     <!-- Modal Verifikasi Pembayaran -->
     <div id="verifikasiModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-6 border w-96 shadow-lg rounded-md bg-white">
@@ -413,130 +417,131 @@
     </div>
 
     <script>
-        // Modal Proses Pengembalian
-        function openModal() {
-            document.getElementById('pengembalianModal').classList.remove('hidden');
+    // Modal Proses Pengembalian
+    function openModal() {
+        document.getElementById('pengembalianModal').classList.remove('hidden');
+        // Reset form
+        document.getElementById('peminjaman_select').value = '';
+        document.getElementById('tanggal_kembali').value = '{{ date("Y-m-d") }}';
+        document.getElementById('kondisi_baik').value = 0;
+        document.getElementById('kondisi_rusak').value = 0;
+        document.getElementById('kondisi_hilang').value = 0;
+        document.getElementById('total_kembali').textContent = '';
+    }
+
+    function closeModal() {
+        document.getElementById('pengembalianModal').classList.add('hidden');
+    }
+
+    const peminjamanSelect = document.getElementById('peminjaman_select');
+    const kondisiBaik = document.getElementById('kondisi_baik');
+    const kondisiRusak = document.getElementById('kondisi_rusak');
+    const kondisiHilang = document.getElementById('kondisi_hilang');
+    const totalKembaliText = document.getElementById('total_kembali');
+    const infoPeminjaman = document.getElementById('info_peminjaman');
+
+    function updateKondisiInfo() {
+        const selected = peminjamanSelect.options[peminjamanSelect.selectedIndex];
+        const jumlahPinjam = parseInt(selected.getAttribute('data-jumlah')) || 0;
+        
+        // Display peminjaman info
+        const user = selected.getAttribute('data-user');
+        const alat = selected.getAttribute('data-alat');
+        infoPeminjaman.textContent = `${user} - ${alat} (${jumlahPinjam}x)`;
+        
+        // Calculate total kembali
+        const baik = parseInt(kondisiBaik.value) || 0;
+        const rusak = parseInt(kondisiRusak.value) || 0;
+        const hilang = parseInt(kondisiHilang.value) || 0;
+        const total = baik + rusak + hilang;
+
+        // Validation & display
+        if (total > jumlahPinjam) {
+            totalKembaliText.innerHTML = `<span class="text-red-600 font-semibold">❌ Total (${total}) melebihi jumlah pinjam (${jumlahPinjam})</span>`;
+        } else if (total < jumlahPinjam) {
+            totalKembaliText.innerHTML = `<span class="text-orange-600 font-semibold">⚠ Hanya ${total}/${jumlahPinjam} item dikembalikan</span>`;
+        } else if (total > 0) {
+            totalKembaliText.innerHTML = `<span class="text-green-600 font-semibold">✓ Semua ${total} item dikembalikan</span>`;
         }
+    }
 
-        function closeModal() {
-            document.getElementById('pengembalianModal').classList.add('hidden');
+    peminjamanSelect.addEventListener('change', updateKondisiInfo);
+    kondisiBaik.addEventListener('input', updateKondisiInfo);
+    kondisiRusak.addEventListener('input', updateKondisiInfo);
+    kondisiHilang.addEventListener('input', updateKondisiInfo);
+
+    document.getElementById('pengembalianModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeModal();
         }
+    });
 
-        const peminjamanSelect = document.getElementById('peminjaman_select');
-        const jumlahKembali = document.getElementById('jumlah_kembali');
-        const tanggalKembali = document.getElementById('tanggal_kembali');
-        const infoPeminjaman = document.getElementById('info_peminjaman');
-        const infoJumlah = document.getElementById('info_jumlah');
-        const infoKeterlambatan = document.getElementById('info_keterlambatan');
-
-        function updateInfo() {
-            const selected = peminjamanSelect.options[peminjamanSelect.selectedIndex];
-            const jatuhTempo = selected.getAttribute('data-jatuh-tempo');
-            const user = selected.getAttribute('data-user');
-            const alat = selected.getAttribute('data-alat');
-            const jumlahPinjam = parseInt(selected.getAttribute('data-jumlah')) || 0;
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
             
-            infoPeminjaman.textContent = `${user} - ${alat}`;
-            
-            if (jumlahKembali.value) {
-                const jumlahReturn = parseInt(jumlahKembali.value);
-                if (jumlahReturn > jumlahPinjam) {
-                    infoJumlah.innerHTML = `<span class="text-red-600 font-semibold">❌ Jumlah return melebihi jumlah pinjaman (${jumlahPinjam})</span>`;
-                    jumlahKembali.classList.add('border-red-500');
-                } else if (jumlahReturn === jumlahPinjam) {
-                    infoJumlah.innerHTML = `<span class="text-green-600">✓ Pengembalian lengkap</span>`;
-                    jumlahKembali.classList.remove('border-red-500');
-                } else {
-                    infoJumlah.innerHTML = `<span class="text-orange-600">⚠ Pengembalian sebagian (${jumlahPinjam - jumlahReturn} item masih dipinjam)</span>`;
-                    jumlahKembali.classList.remove('border-red-500');
-                }
-            }
-            
-            if (jatuhTempo && tanggalKembali.value) {
-                const tempo = new Date(jatuhTempo);
-                const kembali = new Date(tanggalKembali.value);
-                const diff = Math.ceil((kembali - tempo) / (1000 * 60 * 60 * 24));
-                
-                if (diff > 0) {
-                    const denda = diff * 5000;
-                    infoKeterlambatan.innerHTML = `<span class="text-red-600 font-semibold">Terlambat ${diff} hari. Denda per item: Rp ${denda.toLocaleString('id-ID')}</span>`;
-                } else {
-                    infoKeterlambatan.innerHTML = `<span class="text-green-600">Tepat waktu</span>`;
-                }
-            }
-        }
-
-        peminjamanSelect.addEventListener('change', updateInfo);
-        jumlahKembali.addEventListener('input', updateInfo);
-        tanggalKembali.addEventListener('change', updateInfo);
-
-        document.getElementById('pengembalianModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeModal();
-            }
-        });
-
-        // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                
-                document.querySelectorAll('.tab-content').forEach(tab => {
-                    tab.classList.add('hidden');
-                });
-                document.getElementById(tabName).classList.remove('hidden');
-                
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    b.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                    b.classList.add('text-gray-600');
-                });
-                
-                this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-                this.classList.remove('text-gray-600');
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
             });
-        });
-
-        // Modal Verifikasi Pembayaran
-        function openVerifikasiModal(pengembalianId, totalDenda) {
-            const form = document.getElementById('verifikasiForm');
-            form.action = `/pengembalian/${pengembalianId}/verifikasi`;
-            document.getElementById('total_denda_display').value = `Rp ${parseInt(totalDenda).toLocaleString('id-ID')}`;
-            document.getElementById('jumlah_bayar').value = totalDenda;
-            document.getElementById('jumlah_bayar').max = totalDenda;
-            document.getElementById('verifikasiModal').classList.remove('hidden');
+            document.getElementById(tabName).classList.remove('hidden');
             
-            updateKeteranganBayar(totalDenda);
-        }
-
-        function closeVerifikasiModal() {
-            document.getElementById('verifikasiModal').classList.add('hidden');
-        }
-
-        function updateKeteranganBayar(totalDenda) {
-            const jumlahInput = document.getElementById('jumlah_bayar');
-            const keterangan = document.getElementById('keterangan_bayar');
-            
-            jumlahInput.addEventListener('input', function() {
-                const jumlah = parseInt(this.value) || 0;
-                if (jumlah < totalDenda) {
-                    keterangan.textContent = `⚠ Kurang: Rp ${(totalDenda - jumlah).toLocaleString('id-ID')}`;
-                    keterangan.classList.add('text-orange-600');
-                } else if (jumlah > totalDenda) {
-                    keterangan.textContent = `✓ Kembali: Rp ${(jumlah - totalDenda).toLocaleString('id-ID')}`;
-                    keterangan.classList.remove('text-orange-600');
-                    keterangan.classList.add('text-green-600');
-                } else {
-                    keterangan.textContent = '✓ Pas';
-                    keterangan.classList.remove('text-orange-600');
-                    keterangan.classList.add('text-green-600');
-                }
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                b.classList.add('text-gray-600');
             });
-        }
+            
+            this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            this.classList.remove('text-gray-600');
+        });
+    });
 
-        document.getElementById('verifikasiModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeVerifikasiModal();
+    // Modal Verifikasi Pembayaran
+    function openVerifikasiModal(pengembalianId, totalDenda) {
+        const form = document.getElementById('verifikasiForm');
+        form.action = `/pengembalian/${pengembalianId}/verifikasi`;
+        document.getElementById('total_denda_display').value = `Rp ${parseInt(totalDenda).toLocaleString('id-ID')}`;
+        document.getElementById('jumlah_bayar').value = totalDenda;
+        document.getElementById('jumlah_bayar').max = totalDenda;
+        document.getElementById('verifikasiModal').classList.remove('hidden');
+        
+        updateKeteranganBayar(totalDenda);
+    }
+
+    function closeVerifikasiModal() {
+        document.getElementById('verifikasiModal').classList.add('hidden');
+    }
+
+    function updateKeteranganBayar(totalDenda) {
+        const jumlahInput = document.getElementById('jumlah_bayar');
+        const keterangan = document.getElementById('keterangan_bayar');
+        
+        // Remove old listeners
+        jumlahInput.replaceWith(jumlahInput.cloneNode(true));
+        const newJumlahInput = document.getElementById('jumlah_bayar');
+        
+        newJumlahInput.addEventListener('input', function() {
+            const jumlah = parseInt(this.value) || 0;
+            if (jumlah < totalDenda) {
+                keterangan.textContent = `⚠ Kurang: Rp ${(totalDenda - jumlah).toLocaleString('id-ID')}`;
+                keterangan.classList.remove('text-green-600');
+                keterangan.classList.add('text-orange-600');
+            } else if (jumlah > totalDenda) {
+                keterangan.textContent = `✓ Kembali: Rp ${(jumlah - totalDenda).toLocaleString('id-ID')}`;
+                keterangan.classList.remove('text-orange-600');
+                keterangan.classList.add('text-green-600');
+            } else {
+                keterangan.textContent = '✓ Pas';
+                keterangan.classList.remove('text-orange-600');
+                keterangan.classList.add('text-green-600');
             }
         });
-    </script>
+    }
+
+    document.getElementById('verifikasiModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeVerifikasiModal();
+        }
+    });
+</script>
 @endsection

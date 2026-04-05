@@ -49,24 +49,24 @@
     </div>
 
     <!-- Tabs -->
-    <div class="mb-6 border-b border-gray-200">
-        <div class="flex space-x-4">
-            <button onclick="showTab('menunggu')" id="btn-menunggu" class="px-4 py-2 border-b-2 border-blue-500 text-blue-600 font-medium flex items-center space-x-2">
-                <i class="fas fa-hourglass-half"></i>
-                <span>Menunggu Persetujuan</span>
-                <span class="ml-1 bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $peminjamanMenunggu->count() }}</span>
-            </button>
-            <button onclick="showTab('aktif')" id="btn-aktif" class="px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800 flex items-center space-x-2">
-                <i class="fas fa-backpack"></i>
-                <span>Sedang Dipinjam</span>
-                <span class="ml-1 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $peminjamanAktif->count() }}</span>
-            </button>
-            <button onclick="showTab('selesai')" id="btn-selesai" class="px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800 flex items-center space-x-2">
-                <i class="fas fa-check-double"></i>
-                <span>Selesai</span>
-            </button>
-        </div>
+<div class="mb-6 border-b border-gray-200 overflow-x-auto">
+    <div class="flex space-x-2 sm:space-x-4 min-w-min">
+        <button onclick="showTab('menunggu')" id="btn-menunggu" class="px-3 sm:px-4 py-2 border-b-2 border-blue-500 text-blue-600 font-medium flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-sm sm:text-base">
+            <i class="fas fa-hourglass-half"></i>
+            <span>Menunggu</span>
+            <span class="ml-1 bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $peminjamanMenunggu->count() }}</span>
+        </button>
+        <button onclick="showTab('aktif')" id="btn-aktif" class="px-3 sm:px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800 flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-sm sm:text-base">
+            <i class="fas fa-backpack"></i>
+            <span>Dipinjam</span>
+            <span class="ml-1 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $peminjamanAktif->count() }}</span>
+        </button>
+        <button onclick="showTab('selesai')" id="btn-selesai" class="px-3 sm:px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800 flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-sm sm:text-base">
+            <i class="fas fa-check-double"></i>
+            <span>Selesai</span>
+        </button>
     </div>
+</div>
 
     <!-- Tab: Menunggu Persetujuan -->
     <div id="tab-menunggu" class="tab-content">
@@ -189,25 +189,91 @@
                 </table>
             </div>
         @endif
-    </div>
-
-    <!-- Tab: Selesai -->
-    <div id="tab-selesai" class="tab-content hidden">
-        @if($peminjamanSelesai->isEmpty())
-            <div class="bg-white rounded-lg shadow p-8 text-center">
-                <i class="fas fa-check-circle text-4xl text-gray-300 mb-3"></i>
-                <p class="text-gray-500 text-lg">Belum ada peminjaman yang selesai</p>
-            </div>
-        @else
-            <div class="bg-white rounded-lg shadow overflow-hidden">
+    </div><!-- Tab: Sedang Dipinjam -->
+<div id="tab-aktif" class="tab-content hidden">
+    @if($peminjamanAktif->isEmpty())
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500 text-lg">Tidak ada alat yang sedang dipinjam</p>
+        </div>
+    @else
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- TAMBAH: overflow-x-auto wrapper -->
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alat</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peminjam</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tgl Peminjaman</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tgl Kembali</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Alat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Peminjam</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Tgl Peminjaman</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Target Kembali</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($peminjamanAktif as $item)
+                            @php
+                                $today = now();
+                                $targetDate = $item->tanggal_kembali_rencana;
+                                $isLate = $today->gt($targetDate);
+                                $daysLeft = $today->diffInDays($targetDate, false);
+                            @endphp
+                            <tr class="@if($isLate) bg-red-50 @elseif($daysLeft <= 1) bg-yellow-50 @endif hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->alat->nama_alat }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->user->username }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->jumlah }} unit</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->tanggal_peminjaman->format('d/m/Y') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div class="font-medium">{{ $item->tanggal_kembali_rencana->format('d/m/Y') }}</div>
+                                    @if($isLate)
+                                        <p class="text-xs text-red-600"><i class="fas fa-exclamation-triangle"></i> Terlambat {{ abs($daysLeft) }} hari</p>
+                                    @elseif($daysLeft <= 1)
+                                        <p class="text-xs text-yellow-600"><i class="fas fa-clock"></i> Harus segera dikembalikan</p>
+                                    @else
+                                        <p class="text-xs text-gray-500">Tinggal {{ $daysLeft }} hari</p>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 whitespace-nowrap">
+                                        Disetujui
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ route('pengembalian.index') }}" 
+                                        class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded text-xs transition whitespace-nowrap inline-block">
+                                        <i class="fas fa-undo"></i> Catat Pengembalian
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+</div>
+
+   <!-- Tab: Selesai -->
+<div id="tab-selesai" class="tab-content hidden">
+    @if($peminjamanSelesai->isEmpty())
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <i class="fas fa-check-circle text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500 text-lg">Belum ada peminjaman yang selesai</p>
+        </div>
+    @else
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- ✅ TAMBAH: overflow-x-auto wrapper -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Alat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Peminjam</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Tgl Peminjaman</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Tgl Kembali</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -218,7 +284,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->tanggal_peminjaman->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">-</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">
                                         Dikembalikan
                                     </span>
                                 </td>
@@ -227,8 +293,9 @@
                     </tbody>
                 </table>
             </div>
-        @endif
-    </div>
+        </div>
+    @endif
+</div>
 
     <script>
         function showTab(tab) {

@@ -44,70 +44,73 @@ class PengembalianController extends Controller
 }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'peminjaman_id' => 'required|exists:peminjaman,peminjaman_id',
-            'jumlah_kembali' => 'required|integer|min:1',
-            'tanggal_kembali_aktual' => 'required|date',
-            'kondisi_alat' => 'required|in:baik,rusak,hilang',
-            'keterangan' => 'nullable|string',
+{
+    $validated = $request->validate([
+        'peminjaman_id' => 'required|exists:peminjaman,peminjaman_id',
+        'tanggal_kembali_aktual' => 'required|date',
+        'kondisi_baik' => 'required|integer|min:0',
+        'kondisi_rusak' => 'required|integer|min:0',
+        'kondisi_hilang' => 'required|integer|min:0',
+        'keterangan' => 'nullable|string',
+    ]);
+
+    $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
+    
+    $totalKembali = $validated['kondisi_baik'] + $validated['kondisi_rusak'] + $validated['kondisi_hilang'];
+
+    if ($totalKembali > $peminjaman->jumlah) {
+        return back()->withErrors(['kondisi_baik' => 'Total kembali melebihi jumlah pinjaman']);
+    }
+
+    $tanggalKembali = Carbon::parse($request->tanggal_kembali_aktual);
+    $jatuhTempo = Carbon::parse($peminjaman->tanggal_kembali_rencana);
+    $keterlambatan = max(0, $tanggalKembali->diffInDays($jatuhTempo, false) * -1);
+
+    $tarifDenda = 5000;
+    $totalDenda = $keterlambatan * $tarifDenda * $totalKembali;
+
+    DB::transaction(function () use ($validated, $peminjaman, $keterlambatan, $tarifDenda, $totalDenda, $totalKembali) {
+        // 1 TRANSAKSI UNTUK SEMUA KONDISI
+        Pengembalian::create([
+            'peminjaman_id' => $validated['peminjaman_id'],
+            'tanggal_kembali_aktual' => $validated['tanggal_kembali_aktual'],
+            'kondisi_alat' => 'campuran', // atau bisa 'baik' kalau mayoritas baik
+            'keterlambatan_hari' => $keterlambatan,
+            'tarif_denda_per_hari' => $tarifDenda,
+            'total_denda' => $totalDenda,
+            'status_denda' => $totalDenda > 0 ? 'belum_lunas' : 'lunas',
+            'keterangan' => json_encode([
+                'baik' => $validated['kondisi_baik'],
+                'rusak' => $validated['kondisi_rusak'],
+                'hilang' => $validated['kondisi_hilang'],
+                'catatan' => $validated['keterangan']
+            ]),
+            'jumlah_dikembalikan' => $totalKembali,
         ]);
 
-        $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
-
-        if ($validated['jumlah_kembali'] > $peminjaman->jumlah) {
-            return back()->withErrors(['jumlah_kembali' => 'Jumlah kembali tidak boleh melebihi jumlah pinjaman']);
+        $sisaPinjam = $peminjaman->jumlah - $totalKembali;
+        
+        if ($sisaPinjam == 0) {
+            $peminjaman->update(['status' => 'dikembalikan']);
+        } else {
+            $peminjaman->update(['status' => 'sebagian_kembali', 'jumlah' => $sisaPinjam]);
         }
 
-        $tanggalKembali = Carbon::parse($request->tanggal_kembali_aktual);
-        $jatuhTempo = Carbon::parse($peminjaman->tanggal_kembali_rencana);
-        $keterlambatan = max(0, $tanggalKembali->diffInDays($jatuhTempo, false) * -1);
+        // UPDATE STOK SESUAI KONDISI
+        $peminjaman->alat->increment('stok_tersedia', $validated['kondisi_baik']);
+        $peminjaman->alat->increment('stok_rusak', $validated['kondisi_rusak']);
+        $peminjaman->alat->increment('stok_hilang', $validated['kondisi_hilang']);
+    });
 
-        $tarifDenda = 50000;
-        $totalDenda = $keterlambatan * $tarifDenda * $validated['jumlah_kembali'];
+    LogAktivitas::create([
+        'user_id' => Auth::id(),
+        'aktivitas' => 'Proses Pengembalian - ' . $peminjaman->kode_peminjaman . ' (Baik:' . $validated['kondisi_baik'] . ' Rusak:' . $validated['kondisi_rusak'] . ' Hilang:' . $validated['kondisi_hilang'] . ')',
+        'modul' => 'Pengembalian',
+        'timestamp' => now(),
+    ]);
 
-        DB::transaction(function () use ($validated, $peminjaman, $keterlambatan, $tarifDenda, $totalDenda) {
-            Pengembalian::create([
-                'peminjaman_id' => $validated['peminjaman_id'],
-                'tanggal_kembali_aktual' => $validated['tanggal_kembali_aktual'],
-                'kondisi_alat' => $validated['kondisi_alat'],
-                'keterlambatan_hari' => $keterlambatan,
-                'tarif_denda_per_hari' => $tarifDenda,
-                'total_denda' => $totalDenda,
-                'status_denda' => $totalDenda > 0 ? 'belum_lunas' : 'lunas',
-                'keterangan' => $validated['keterangan'],
-                'jumlah_dikembalikan' => $validated['jumlah_kembali'],
-            ]);
-
-            $sisaPinjam = $peminjaman->jumlah - $validated['jumlah_kembali'];
-            
-            if ($sisaPinjam == 0) {
-                $peminjaman->update(['status' => 'dikembalikan']);
-            } else {
-                $peminjaman->update([
-                    'status' => 'sebagian_kembali',
-                    'jumlah' => $sisaPinjam
-                ]);
-            }
-
-            if ($validated['kondisi_alat'] == 'baik') {
-                $peminjaman->alat->increment('stok_tersedia', $validated['jumlah_kembali']);
-            } elseif ($validated['kondisi_alat'] == 'rusak') {
-                $peminjaman->alat->increment('stok_rusak', $validated['jumlah_kembali']);
-            } else {
-                $peminjaman->alat->increment('stok_hilang', $validated['jumlah_kembali']);
-            }
-        });
-
-        LogAktivitas::create([
-            'user_id' => Auth::id(),
-            'aktivitas' => 'Proses Pengembalian - ' . $peminjaman->kode_peminjaman . ' (' . $validated['jumlah_kembali'] . ' item)',
-            'modul' => 'Pengembalian',
-            'timestamp' => now(),
-        ]);
-
-        return redirect()->route('pengembalian.index')->with('success', 'Pengembalian berhasil diproses!');
-    }
+    return redirect()->route('pengembalian.index')->with('success', 'Pengembalian berhasil diproses!');
+}
 
     // UPDATE: Verifikasi pembayaran denda
     public function verifikasiPembayaran(Request $request, $id)
