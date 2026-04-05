@@ -10,7 +10,10 @@ return new class extends Migration
     {
         if (Schema::hasTable('log_aktivitas')) return;
 
-        Schema::create('log_aktivitas', function (Blueprint $table) {
+        // Deteksi kolom primary key tabel users (bisa user_id atau id)
+        $userPK = Schema::hasColumn('users', 'user_id') ? 'user_id' : 'id';
+
+        Schema::create('log_aktivitas', function (Blueprint $table) use ($userPK) {
             $table->increments('log_id');
             $table->unsignedInteger('user_id')->nullable();
             $table->string('aktivitas', 255);
@@ -18,7 +21,7 @@ return new class extends Migration
             $table->timestamp('timestamp')->useCurrent();
 
             $table->foreign('user_id')
-                  ->references('user_id')->on('users')
+                  ->references($userPK)->on('users')
                   ->onUpdate('cascade')
                   ->onDelete('set null');
 

@@ -10,11 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         // Buat ENUM type untuk status_peminjaman (abaikan jika sudah ada)
-        DB::statement("DO $$ BEGIN CREATE TYPE status_peminjaman AS ENUM ('menunggu', 'disetujui', 'ditolak', 'dikembalikan', 'sebagian_kembali'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+        DB::statement("DO \$\$ BEGIN CREATE TYPE status_peminjaman AS ENUM ('menunggu', 'disetujui', 'ditolak', 'dikembalikan', 'sebagian_kembali'); EXCEPTION WHEN duplicate_object THEN null; END \$\$");
 
         if (Schema::hasTable('peminjaman')) return;
 
-        Schema::create('peminjaman', function (Blueprint $table) {
+        // Deteksi kolom primary key tabel users (bisa user_id atau id)
+        $userPK = Schema::hasColumn('users', 'user_id') ? 'user_id' : 'id';
+
+        Schema::create('peminjaman', function (Blueprint $table) use ($userPK) {
             $table->increments('peminjaman_id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('alat_id');
@@ -29,7 +32,7 @@ return new class extends Migration
             $table->timestamp('updated_at')->useCurrent();
 
             $table->foreign('user_id')
-                  ->references('user_id')->on('users')
+                  ->references($userPK)->on('users')
                   ->onUpdate('cascade')
                   ->onDelete('restrict');
 
@@ -39,7 +42,7 @@ return new class extends Migration
                   ->onDelete('restrict');
 
             $table->foreign('disetujui_oleh')
-                  ->references('user_id')->on('users')
+                  ->references($userPK)->on('users')
                   ->onUpdate('cascade')
                   ->onDelete('set null');
 

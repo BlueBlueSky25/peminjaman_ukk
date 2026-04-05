@@ -10,11 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         // Buat ENUM type untuk status_denda (abaikan jika sudah ada)
-        DB::statement("DO $$ BEGIN CREATE TYPE status_denda AS ENUM ('lunas', 'belum_lunas'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+        DB::statement("DO \$\$ BEGIN CREATE TYPE status_denda AS ENUM ('lunas', 'belum_lunas'); EXCEPTION WHEN duplicate_object THEN null; END \$\$");
 
         if (Schema::hasTable('pengembalian')) return;
 
-        Schema::create('pengembalian', function (Blueprint $table) {
+        // Deteksi kolom primary key tabel users (bisa user_id atau id)
+        $userPK = Schema::hasColumn('users', 'user_id') ? 'user_id' : 'id';
+
+        Schema::create('pengembalian', function (Blueprint $table) use ($userPK) {
             $table->increments('pengembalian_id');
             $table->unsignedInteger('peminjaman_id');
             $table->date('tanggal_kembali_aktual');
@@ -35,13 +38,13 @@ return new class extends Migration
                   ->onDelete('restrict');
 
             $table->foreign('diverifikasi_oleh')
-                  ->references('user_id')->on('users');
+                  ->references($userPK)->on('users');
 
             $table->index('peminjaman_id', 'idx_pengembalian_peminjaman');
         });
 
         // Tambah kolom ENUM secara manual (PostgreSQL)
-        DB::statement("ALTER TABLE pengembalian ADD COLUMN kondisi_alat kondisi_alat NOT NULL");
+        DB::statement("ALTER TABLE pengembalian ADD COLUMN kondisi_alat kondisi_alat NOT NULL DEFAULT 'baik'");
         DB::statement("ALTER TABLE pengembalian ADD COLUMN status_denda status_denda DEFAULT 'belum_lunas'::status_denda");
     }
 
