@@ -6,19 +6,29 @@
     <title>@yield('title', 'Dashboard') - Sistem Peminjaman Alat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Custom xs breakpoint */
+        @media (min-width: 375px) {
+            .xs\:flex { display: flex; }
+            .xs\:hidden { display: none; }
+            .xs\:inline { display: inline; }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     
     <!-- Header Component -->
-    <x-header :username="session('username')" />
+    <x-header />
 
-    <div class="flex">
+    <div class="flex flex-col sm:flex-row">
         <!-- Sidebar Component -->
         <x-sidebar />
 
         <!-- Main Content -->
-        <main class="flex-1 p-8">
-            @yield('content')
+        <main class="flex-1 w-full min-h-screen">
+            <div class="p-4 sm:p-6 lg:p-8">
+                @yield('content')
+            </div>
         </main>
     </div>
 

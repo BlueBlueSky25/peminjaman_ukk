@@ -21,14 +21,14 @@
     $iconColor = $iconColors[$color] ?? $iconColors['blue'];
 @endphp
 
-<div class="bg-white rounded-lg shadow p-6">
+<div class="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition">
     <div class="flex items-center justify-between">
-        <div>
-            <p class="text-sm text-gray-600 mb-1">{{ $title }}</p>
-            <p class="text-3xl font-bold text-gray-800">{{ $value }}</p>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm text-gray-600 mb-1 truncate">{{ $title }}</p>
+            <p class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ $value }}</p>
         </div>
-        <div class="w-16 h-16 {{ $bgColor }} rounded-full flex items-center justify-center">
-            <i class="fas {{ $icon }} text-2xl {{ $iconColor }}"></i>
+        <div class="w-12 h-12 sm:w-16 sm:h-16 {{ $bgColor }} rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+            <i class="fas {{ $icon }} text-lg sm:text-2xl {{ $iconColor }}"></i>
         </div>
     </div>
 </div>
