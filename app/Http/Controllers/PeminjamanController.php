@@ -39,7 +39,7 @@ class PeminjamanController extends Controller
             ->get();
             
         $peminjamanSelesai = Peminjaman::where('status', 'dikembalikan')
-            ->with(['user', 'alat', 'petugas'])
+            ->with(['user', 'alat', 'petugas','pengembalian'])
             ->latest()
             ->limit(10)
             ->get();
