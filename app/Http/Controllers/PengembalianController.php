@@ -43,7 +43,7 @@ class PengembalianController extends Controller
     return view('pages.pengembalian.index', compact('pengembalian', 'peminjamanBelumSelesai', 'dendaBelumLunas', 'barangMasihDipinjam'));
 }
 
-    public function store(Request $request)
+   public function store(Request $request)
 {
     $validated = $request->validate([
         'peminjaman_id' => 'required|exists:peminjaman,peminjaman_id',
@@ -70,11 +70,20 @@ class PengembalianController extends Controller
     $totalDenda = $keterlambatan * $tarifDenda * $totalKembali;
 
     DB::transaction(function () use ($validated, $peminjaman, $keterlambatan, $tarifDenda, $totalDenda, $totalKembali) {
-        // 1 TRANSAKSI UNTUK SEMUA KONDISI
+        // ✅ TENTUKAN KONDISI MAYORITAS
+        $kondisiAlat = 'baik'; // Default
+        if ($validated['kondisi_rusak'] > 0) {
+            $kondisiAlat = 'rusak';
+        }
+        if ($validated['kondisi_hilang'] > 0) {
+            $kondisiAlat = 'hilang'; // Prioritas tertinggi
+        }
+
+        // ✅ 1 TRANSAKSI UNTUK SEMUA KONDISI
         Pengembalian::create([
             'peminjaman_id' => $validated['peminjaman_id'],
             'tanggal_kembali_aktual' => $validated['tanggal_kembali_aktual'],
-            'kondisi_alat' => 'campuran', // atau bisa 'baik' kalau mayoritas baik
+            'kondisi_alat' => $kondisiAlat, // ✅ Gunakan enum yang valid
             'keterlambatan_hari' => $keterlambatan,
             'tarif_denda_per_hari' => $tarifDenda,
             'total_denda' => $totalDenda,
@@ -96,7 +105,7 @@ class PengembalianController extends Controller
             $peminjaman->update(['status' => 'sebagian_kembali', 'jumlah' => $sisaPinjam]);
         }
 
-        // UPDATE STOK SESUAI KONDISI
+        //  UPDATE STOK SESUAI KONDISI
         $peminjaman->alat->increment('stok_tersedia', $validated['kondisi_baik']);
         $peminjaman->alat->increment('stok_rusak', $validated['kondisi_rusak']);
         $peminjaman->alat->increment('stok_hilang', $validated['kondisi_hilang']);
@@ -111,7 +120,6 @@ class PengembalianController extends Controller
 
     return redirect()->route('pengembalian.index')->with('success', 'Pengembalian berhasil diproses!');
 }
-
     // UPDATE: Verifikasi pembayaran denda
     public function verifikasiPembayaran(Request $request, $id)
     {
