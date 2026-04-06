@@ -9,6 +9,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PengembalianController;
 use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PengaturanController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root -> form peminjaman publik
@@ -133,6 +134,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/kategori', [KategoriController::class, 'store'])->name('kategori.store');
     Route::put('/kategori/{kategori}', [KategoriController::class, 'update'])->name('kategori.update');
     Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
+    Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
+    Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
 });
 
 // ============================================================
