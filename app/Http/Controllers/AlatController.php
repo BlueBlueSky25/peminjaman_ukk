@@ -30,7 +30,7 @@ class AlatController extends Controller
         'deskripsi' => 'nullable|string',
         'kode_alat' => 'required|string|unique:alat,kode_alat',
         'stok_total' => 'required|integer|min:1',
-        'kondisi' => 'required|in:baik,rusak,hilang', // ✅ Update
+        'kondisi' => 'required|in:baik,rusak,hilang', // Update
         'lokasi' => 'nullable|string',
     ]);
 
@@ -62,7 +62,7 @@ class AlatController extends Controller
         'deskripsi' => 'nullable|string',
         'kode_alat' => 'required|string|unique:alat,kode_alat,' . $alat->alat_id . ',alat_id',
         'stok_total' => 'required|integer|min:1',
-        'kondisi' => 'required|in:baik,rusak,hilang', // ✅ Update
+        'kondisi' => 'required|in:baik,rusak,hilang', // Update
         'lokasi' => 'nullable|string',
     ]);
 

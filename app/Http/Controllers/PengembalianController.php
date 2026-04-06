@@ -88,7 +88,7 @@ class PengembalianController extends Controller
             $kondisiAlat = 'rusak';
         }
 
-        // ✅ Validasi enum sebelum insert
+        // Validasi enum sebelum insert
         $validKondisi = ['baik', 'rusak', 'hilang'];
         if (!in_array($kondisiAlat, $validKondisi)) {
             throw new \Exception('Kondisi alat tidak valid');
