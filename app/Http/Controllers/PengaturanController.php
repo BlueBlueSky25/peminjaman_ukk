@@ -12,7 +12,7 @@ class PengaturanController extends Controller
     public function index()
     {
         $pengaturan = Pengaturan::all();
-        return view('pages.pengaturan.index-pengaturan', compact('pengaturan'));
+        return view('pages.pengaturan.index', compact('pengaturan'));
     }
 
     public function update(Request $request)
