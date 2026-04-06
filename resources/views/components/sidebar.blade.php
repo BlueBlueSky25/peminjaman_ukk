@@ -64,6 +64,13 @@
                 <span class="truncate">Log Aktivitas</span>
             </a>
 
+            <!-- Pengaturan Denda -->
+            <a href="{{ route('pengaturan.index-pengaturan') }}" 
+                class="flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base {{ request()->routeIs('pengaturan.*') ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg transition">
+                <i class="fas fa-book {{ request()->routeIs('pengaturan.*') ? 'text-blue-500' : 'text-gray-400' }} w-4 sm:w-5 flex-shrink-0"></i>
+                <span class="truncate">Pengaturan Denda</span>
+            </a>
+
             <!-- Laporan -->
             <a href="{{ route('laporan.index') }}" 
                 class="flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base {{ request()->routeIs('laporan.*') ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg transition">
