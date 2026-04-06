@@ -73,7 +73,7 @@
                         @foreach($dendaBelumLunas as $item)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $item->peminjaman->user->username }}
+                                    {{ $item->peminjaman->nama_peminjam ?? $item->peminjaman->user->username ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->peminjaman->alat->nama_alat }}
@@ -143,7 +143,7 @@
                             @endphp
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $item->user->username }}
+                                    {{ $item->peminjaman->user->username ?? $item->peminjaman->nama_peminjam ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->alat->nama_alat }} ({{ $item->jumlah }}x)
@@ -210,7 +210,7 @@
                         @foreach($pengembalian as $item)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $item->peminjaman->user->username }}
+                                    {{ $item->peminjaman->user->username ?? $item->peminjaman->nama_peminjam ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->peminjaman->alat->nama_alat }}
@@ -283,14 +283,14 @@
                 <select name="peminjaman_id" id="peminjaman_select" required 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                     <option value="">Pilih Peminjaman</option>
-                    @foreach($peminjamanBelumSelesai as $pinjam)
-                        <option value="{{ $pinjam->peminjaman_id }}" 
-                            data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
-                            data-user="{{ $pinjam->user->username }}"
-                            data-alat="{{ $pinjam->alat->nama_alat }}"
-                            data-jumlah="{{ $pinjam->jumlah }}">
-                            {{ $pinjam->user->username }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
-                        </option>
+                   @foreach($peminjamanBelumSelesai as $pinjam)
+                    <option value="{{ $pinjam->peminjaman_id }}" 
+                        data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
+                        data-user="{{ $pinjam->nama_peminjam ?? $pinjam->user->username ?? '-' }}"
+                        data-alat="{{ $pinjam->alat->nama_alat }}"
+                        data-jumlah="{{ $pinjam->jumlah }}">
+                        {{ $pinjam->nama_peminjam ?? $pinjam->user->username ?? '-' }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
+                    </option>
                     @endforeach
                 </select>
                 <p id="info_peminjaman" class="text-xs text-gray-500 mt-1"></p>
