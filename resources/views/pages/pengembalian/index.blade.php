@@ -134,12 +134,13 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($barangMasihDipinjam as $item)
+                       @foreach($barangMasihDipinjam as $item)
                             @php
                                 $today = \Carbon\Carbon::today();
                                 $jatuhTempo = \Carbon\Carbon::parse($item->tanggal_kembali_rencana);
                                 $hariTerlambat = $today->diffInDays($jatuhTempo, false);
-                                $dendaEstimasi = max(0, abs($hariTerlambat) * 5000 * $item->jumlah);
+                                $tarifDenda = \App\Models\Pengaturan::where('key', 'tarif_denda')->first()?->value ?? 5000;
+                                $dendaEstimasi = max(0, abs($hariTerlambat) * $tarifDenda * $item->jumlah);
                             @endphp
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
