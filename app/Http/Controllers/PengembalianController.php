@@ -81,7 +81,7 @@ class PengembalianController extends Controller
     $jatuhTempo = Carbon::parse($peminjaman->tanggal_kembali_rencana);
     $keterlambatan = max(0, $tanggalKembali->diffInDays($jatuhTempo, false) * -1);
 
-    $tarifDenda = 5000;
+    $tarifDenda = Pengaturan::where('key', 'tarif_denda')->first()?->value ?? 5000;
     $totalDenda = $keterlambatan * $tarifDenda * $totalKembali;
 
     DB::transaction(function () use ($validated, $peminjaman, $keterlambatan, $tarifDenda, $totalDenda, $totalKembali) {
