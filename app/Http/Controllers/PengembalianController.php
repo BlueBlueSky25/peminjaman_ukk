@@ -12,36 +12,41 @@ use Carbon\Carbon;
 
 class PengembalianController extends Controller
 {
-    public function index()
-{
-    // Ambil semua peminjaman yang belum dikembalikan sepenuhnya
-    $peminjamanBelumSelesai = Peminjaman::with(['pengembalian', 'user', 'alat'])
-        ->whereIn('status', ['disetujui', 'sebagian_kembali'])  // Exclude ditolak
-        ->get()
-        ->map(function($peminjaman) {
-            $totalDikembalikan = $peminjaman->pengembalian()->sum('jumlah_dikembalikan') ?? 0;
-            if ($totalDikembalikan < $peminjaman->jumlah) {
-                return $peminjaman;
-            }
-        })
-        ->filter();
+      public function index()
+    {
+        // Ambil semua peminjaman yang belum dikembalikan sepenuhnya
+        $peminjamanBelumSelesai = Peminjaman::with(['pengembalian', 'user', 'alat'])
+            ->whereIn('status', ['disetujui', 'sebagian_kembali'])
+            ->get()
+            ->map(function($peminjaman) {
+                $totalDikembalikan = $peminjaman->pengembalian()->sum('jumlah_dikembalikan') ?? 0;
+                if ($totalDikembalikan < $peminjaman->jumlah) {
+                    return $peminjaman;
+                }
+            })
+            ->filter();
 
-    $pengembalian = Pengembalian::with('peminjaman.user', 'peminjaman.alat')->latest()->get();
-    
-    // PERBAIKAN: Hanya denda yang belum_lunas
-    $dendaBelumLunas = Pengembalian::where('status_denda', 'belum_lunas')
-        ->with(['peminjaman.user', 'peminjaman.alat'])
-        ->latest()
-        ->get();
-    
-    // PERBAIKAN: Exclude peminjaman yang ditolak
-    $barangMasihDipinjam = Peminjaman::whereIn('status', ['disetujui', 'sebagian_kembali'])
-        ->with(['user', 'alat', 'pengembalian'])
-        ->latest()
-        ->get();
-    
-    return view('pages.pengembalian.index', compact('pengembalian', 'peminjamanBelumSelesai', 'dendaBelumLunas', 'barangMasihDipinjam'));
-}
+        // ✅ FIX: Filter hanya pengembalian dengan peminjaman yang valid
+        $pengembalian = Pengembalian::whereHas('peminjaman')
+            ->with('peminjaman.user', 'peminjaman.alat')
+            ->latest()
+            ->get();
+        
+        // ✅ FIX: Sama untuk dendaBelumLunas
+        $dendaBelumLunas = Pengembalian::where('status_denda', 'belum_lunas')
+            ->whereHas('peminjaman')
+            ->with(['peminjaman.user', 'peminjaman.alat'])
+            ->latest()
+            ->get();
+        
+        // ✅ FIX: Exclude peminjaman yang ditolak
+        $barangMasihDipinjam = Peminjaman::whereIn('status', ['disetujui', 'sebagian_kembali'])
+            ->with(['user', 'alat', 'pengembalian'])
+            ->latest()
+            ->get();
+        
+        return view('pages.pengembalian.index', compact('pengembalian', 'peminjamanBelumSelesai', 'dendaBelumLunas', 'barangMasihDipinjam'));
+    }
 
    public function store(Request $request)
 {
