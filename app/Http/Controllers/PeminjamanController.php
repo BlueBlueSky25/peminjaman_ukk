@@ -60,7 +60,7 @@ class PeminjamanController extends Controller
             'user_id' => 'required|exists:users,user_id',
             'alat_id' => 'required|exists:alat,alat_id',
             'jumlah' => 'required|integer|min:1',
-            'tanggal_peminjaman' => 'required|date',
+            'tanggal_peminjaman' => 'required|date|after_or_equal:today',
             'tanggal_kembali_rencana' => 'required|date|after:tanggal_peminjaman',
             'tujuan_peminjaman' => 'nullable|string',
         ]);

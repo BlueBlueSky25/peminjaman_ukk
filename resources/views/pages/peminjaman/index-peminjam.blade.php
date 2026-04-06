@@ -59,7 +59,7 @@
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Peminjaman <span class="text-red-600">*</span></label>
-                        <input type="date" name="tanggal_peminjaman" required 
+                        <input type="date" name="tanggal_peminjaman" required min="{{ date('Y-m-d') }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         @error('tanggal_peminjaman')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -68,7 +68,7 @@
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kembali Rencana <span class="text-red-600">*</span></label>
-                        <input type="date" name="tanggal_kembali_rencana" required 
+                        <input type="date" name="tanggal_kembali_rencana" id="tanggal_kembali" required 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         @error('tanggal_kembali_rencana')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -173,6 +173,23 @@
                 jumlahInput.max = '';
                 stokInfo.textContent = '';
             }
+
+            const today = new Date().toISOString().split('T')[0];
+            const tglPinjam = document.querySelector('input[name="tanggal_peminjaman"]');
+            const tglKembali = document.getElementById('tanggal_kembali');
+
+            // Set min hari ini
+            tglPinjam.min = today;
+
+            // Saat tanggal peminjaman berubah, update min tanggal kembali
+            tglPinjam.addEventListener('change', function() {
+                tglKembali.min = this.value;
+                if (tglKembali.value && tglKembali.value <= this.value) {
+                    tglKembali.value = '';
+                }
+            });
+
+
         });
     </script>
 @endsection
