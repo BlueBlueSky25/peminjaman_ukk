@@ -15,6 +15,7 @@ class Peminjaman extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'kode_peminjaman',
         'user_id',
         'alat_id',
         'jumlah',

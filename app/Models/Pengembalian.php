@@ -47,4 +47,5 @@ class Pengembalian extends Model
     {
     return $this->belongsTo(User::class, 'diverifikasi_oleh', 'user_id');
     }
+    
 }

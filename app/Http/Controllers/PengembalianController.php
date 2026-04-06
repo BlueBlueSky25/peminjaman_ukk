@@ -64,10 +64,6 @@ class PengembalianController extends Controller
     
     $totalKembali = $validated['kondisi_baik'] + $validated['kondisi_rusak'] + $validated['kondisi_hilang'];
 
-
-   
-    
-
     if ($totalKembali === 0) {
         return back()->withErrors(['kondisi_baik' => 'Minimal ada 1 item yang dikembalikan']);
     }

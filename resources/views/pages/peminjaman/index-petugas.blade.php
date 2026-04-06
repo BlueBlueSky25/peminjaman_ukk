@@ -282,7 +282,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->alat->nama_alat }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->user->username }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->tanggal_peminjaman->format('d/m/Y') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"> @php $kembali = $item->pengembalian->last() @endphp
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"> @php $kembali = $item->pengembalian @endphp
     {{ $kembali ? $kembali->tanggal_kembali_aktual->format('d/m/Y') : '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">
