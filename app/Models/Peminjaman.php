@@ -17,6 +17,8 @@ class Peminjaman extends Model
     protected $fillable = [
         'kode_peminjaman',
         'user_id',
+        'nama_peminjam',
+        'email',
         'alat_id',
         'jumlah',
         'tanggal_peminjaman',
@@ -34,7 +36,7 @@ class Peminjaman extends Model
     ];
 
     protected $attributes = [
-        'status' => 'menunggu', // Update default value
+        'status' => 'menunggu',
     ];
 
     // Relationships
@@ -57,8 +59,9 @@ class Peminjaman extends Model
     {
         return $this->hasOne(Pengembalian::class, 'peminjaman_id', 'peminjaman_id');
     }
+
     public function getRouteKeyName()
     {
-    return 'peminjaman_id';
+        return 'peminjaman_id';
     }
 }

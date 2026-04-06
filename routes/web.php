@@ -11,15 +11,27 @@ use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\LaporanController;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root
+// Redirect root -> form peminjaman publik
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('peminjaman.form');
 });
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// ============================================================
+// PUBLIC ROUTES (Tanpa Login)
+// ============================================================
+
+// Form peminjaman publik - peminjam langsung akses tanpa login
+Route::get('/peminjaman/form', [PeminjamanController::class, 'form'])
+    ->name('peminjaman.form');
+
+// Submit form peminjaman publik
+Route::post('/peminjaman/form', [PeminjamanController::class, 'storePublic'])
+    ->name('peminjaman.storePublic');
 
 // ============================================================
 // Protected Routes (Auth Required)
@@ -58,24 +70,15 @@ Route::middleware('auth')->group(function () {
 });
 
 // ============================================================
-// PEMINJAMAN ROUTES
+// PEMINJAMAN ROUTES (Auth Required)
 // ============================================================
 Route::middleware('auth')->group(function () {
-    // View peminjaman - Semua role (menampilkan layout berbeda sesuai role)
+    // View peminjaman - Admin & Petugas (dashboard tracking)
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])
         ->name('peminjaman.index')
-        ->middleware('role:admin,petugas,peminjam');
-    
-    // Create peminjaman - Admin & Peminjam
-    Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])
-        ->name('peminjaman.create')
-        ->middleware('role:admin,peminjam');
-    
-    Route::post('/peminjaman', [PeminjamanController::class, 'store'])
-        ->name('peminjaman.store')
-        ->middleware('role:admin,peminjam');
-    
-    // Update Status - Admin & Petugas (untuk reject)
+        ->middleware('role:admin,petugas');
+
+    // Update Status - Admin & Petugas
     Route::put('/peminjaman/{peminjaman}', [PeminjamanController::class, 'update'])
         ->name('peminjaman.update')
         ->middleware('role:admin,petugas');
@@ -85,7 +88,7 @@ Route::middleware('auth')->group(function () {
         ->name('peminjaman.destroy')
         ->middleware('role:admin');
     
-    // Approve/Reject peminjaman - Admin & Petugas
+    // Approve peminjaman - Admin & Petugas
     Route::patch('/peminjaman/{peminjaman}/approve', [PeminjamanController::class, 'approve'])
         ->name('peminjaman.approve')
         ->middleware('role:admin,petugas');
@@ -95,17 +98,14 @@ Route::middleware('auth')->group(function () {
 // PENGEMBALIAN ROUTES
 // ============================================================
 Route::middleware('auth')->group(function () {
-    // View pengembalian - Semua role
     Route::get('/pengembalian', [PengembalianController::class, 'index'])
         ->name('pengembalian.index')
-        ->middleware('role:admin,petugas,peminjam');
+        ->middleware('role:admin,petugas');
     
-    // Create/Store pengembalian - Admin, Petugas & Peminjam
     Route::post('/pengembalian', [PengembalianController::class, 'store'])
         ->name('pengembalian.store')
-        ->middleware('role:admin,petugas,peminjam');
+        ->middleware('role:admin,petugas');
     
-    // Delete pengembalian - Admin only
     Route::delete('/pengembalian/{pengembalian}', [PengembalianController::class, 'destroy'])
         ->name('pengembalian.destroy')
         ->middleware('role:admin');
@@ -113,12 +113,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pengembalian/{pengembalian}/verifikasi', [PengembalianController::class, 'verifikasiPembayaran'])
         ->name('pengembalian.verifikasi')
         ->middleware('role:admin,petugas');
-    
-    Route::delete('/pengembalian/{pengembalian}', [PengembalianController::class, 'destroy'])
-        ->name('pengembalian.destroy')
-        ->middleware('role:admin');
 });
-   
 
 // ============================================================
 // USER MANAGEMENT ROUTES - Admin Only
