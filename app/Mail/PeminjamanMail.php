@@ -30,7 +30,7 @@ class PeminjamanMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.peminjaman',
+            view: 'mail.peminjaman-mail',
         );
     }
 }
