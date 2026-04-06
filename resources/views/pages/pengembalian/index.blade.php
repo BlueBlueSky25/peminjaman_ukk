@@ -73,7 +73,7 @@
                         @foreach($dendaBelumLunas as $item)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $item->peminjaman->nama_peminjam ?? $item->peminjaman->user->username ?? '-' }}
+                                    {{ $item->peminjaman->nama_peminjam ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->peminjaman->alat->nama_alat }}
@@ -143,7 +143,7 @@
                             @endphp
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $item->peminjaman->user->username ?? $item->peminjaman->nama_peminjam ?? '-' }}
+                                    {{ $item->peminjaman->nama_peminjam ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->alat->nama_alat }} ({{ $item->jumlah }}x)
@@ -210,7 +210,7 @@
                         @foreach($pengembalian as $item)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $item->peminjaman->user->username ?? $item->peminjaman->nama_peminjam ?? '-' }}
+                                    {{ $item->peminjaman->nama_peminjam ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $item->peminjaman->alat->nama_alat }}
@@ -286,10 +286,10 @@
                    @foreach($peminjamanBelumSelesai as $pinjam)
                     <option value="{{ $pinjam->peminjaman_id }}" 
                         data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
-                        data-user="{{ $pinjam->nama_peminjam ?? $pinjam->user->username ?? '-' }}"
+                        data-user="{{ $pinjam->nama_peminjam ?? '-' }}"
                         data-alat="{{ $pinjam->alat->nama_alat }}"
                         data-jumlah="{{ $pinjam->jumlah }}">
-                        {{ $pinjam->nama_peminjam ?? $pinjam->user->username ?? '-' }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
+                        {{ $pinjam->nama_peminjam ?? '-' }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
                     </option>
                     @endforeach
                 </select>
