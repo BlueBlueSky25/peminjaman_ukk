@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
     // View alat - Admin & Peminjam bisa akses
     Route::get('/alat', [AlatController::class, 'index'])
         ->name('alat.index')
-        ->middleware('role:admin,peminjam');
+        ->middleware('role:admin,peminjam,petugas');
     
     // CRUD alat - Hanya Admin
     Route::get('/alat/create', [AlatController::class, 'create'])
