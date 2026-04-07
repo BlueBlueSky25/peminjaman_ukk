@@ -19,6 +19,7 @@ class Alat extends Model
         'nama_alat',
         'deskripsi',
         'kode_alat',
+        'harga_alat',
         'stok_total',
         'stok_tersedia',
         'stok_rusak',      

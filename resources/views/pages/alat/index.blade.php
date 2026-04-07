@@ -107,13 +107,21 @@
                     <!-- Body Card -->
                     <div class="p-4">
                         <!-- Kode & Lokasi -->
-                        <div class="flex items-center text-sm text-gray-600 mb-3">
+                        <div class="flex items-center text-sm text-gray-600 mb-2">
                             <i class="fas fa-barcode w-5"></i>
                             <span class="ml-2">{{ $alat->kode_alat }}</span>
                             @if($alat->lokasi)
                                 <i class="fas fa-map-marker-alt w-5 ml-4"></i>
                                 <span class="ml-2">{{ $alat->lokasi }}</span>
                             @endif
+                        </div>
+
+                        <!-- Harga Alat -->
+                        <div class="flex items-center text-sm text-gray-600 mb-3">
+                            <i class="fas fa-tag w-5"></i>
+                            <span class="ml-2 font-medium">
+                                Rp {{ number_format($alat->harga_alat ?? 0, 0, ',', '.') }}
+                            </span>
                         </div>
 
                        <!-- Stok Info -->
@@ -292,6 +300,19 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Jumlah unit">
                     </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Harga Alat <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center">
+                            <span class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-gray-600 text-sm font-medium">Rp</span>
+                            <input type="number" id="harga_alat" name="harga_alat" min="0" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Contoh: 5000000">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Digunakan untuk menghitung denda kerusakan & kehilangan</p>
+                    </div>
                 </div>
 
                 <!-- Kolom Kanan -->
@@ -375,11 +396,10 @@
         document.getElementById('kategori_id').value = '';
         document.getElementById('kode_alat').value = '';
         document.getElementById('stok_total').value = '';
+        document.getElementById('harga_alat').value = '';
         document.getElementById('kondisi').value = '';
         document.getElementById('lokasi').value = '';
         document.getElementById('deskripsi').value = '';
-        
-        // Enable kode alat input untuk mode tambah
         document.getElementById('kode_alat').readOnly = false;
     }
 
@@ -396,11 +416,10 @@
         document.getElementById('kategori_id').value = data.kategori_id;
         document.getElementById('kode_alat').value = data.kode_alat;
         document.getElementById('stok_total').value = data.stok_total;
+        document.getElementById('harga_alat').value = data.harga_alat || 0;
         document.getElementById('kondisi').value = data.kondisi;
         document.getElementById('lokasi').value = data.lokasi || '';
         document.getElementById('deskripsi').value = data.deskripsi || '';
-        
-        // Disable kode alat input untuk mode edit
         document.getElementById('kode_alat').readOnly = true;
     }
 
