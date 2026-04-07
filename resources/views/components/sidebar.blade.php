@@ -12,7 +12,7 @@
         @endphp
 
         <!-- Alat - admin & peminjam -->
-        @if(in_array($userLevel, ['admin', 'peminjam']))
+        @if(in_array($userLevel, ['admin', 'peminjam','petugas']))
             <a href="{{ route('alat.index') }}" 
                 class="flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base {{ request()->routeIs('alat.*') ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg transition">
                 <i class="fas fa-wrench {{ request()->routeIs('alat.*') ? 'text-blue-500' : 'text-gray-400' }} w-4 sm:w-5 flex-shrink-0"></i>
