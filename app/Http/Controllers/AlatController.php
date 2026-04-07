@@ -82,6 +82,11 @@ class AlatController extends Controller
 
     public function destroy(Alat $alat)
     {
+        // Cek apakah alat masih punya riwayat peminjaman
+        if ($alat->peminjaman()->count() > 0) {
+            return redirect()->route('alat.index')->with('error', 'Alat tidak dapat dihapus karena masih memiliki riwayat peminjaman!');
+        }
+
         $alat->delete();
 
         LogAktivitas::create([

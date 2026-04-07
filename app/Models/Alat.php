@@ -35,12 +35,13 @@ class Alat extends Model
     }
 
     public function peminjaman()
-    {
-        return $this->hasMany(Peminjaman::class, 'alat_id', 'alat_id');
-    }
+{
+    return $this->hasMany(\App\Models\Peminjaman::class, 'alat_id', 'alat_id');
+}
 
     public function getRouteKeyName()
     {
     return 'alat_id';
     }
+    
 }
