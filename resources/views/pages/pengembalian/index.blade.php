@@ -289,7 +289,8 @@
                         data-jatuh-tempo="{{ $pinjam->tanggal_kembali_rencana->format('Y-m-d') }}"
                         data-user="{{ $pinjam->nama_peminjam ?? '-' }}"
                         data-alat="{{ $pinjam->alat->nama_alat }}"
-                        data-jumlah="{{ $pinjam->jumlah }}">
+                        data-jumlah="{{ $pinjam->jumlah }}"
+                        data-harga="{{ $pinjam->alat->harga_alat ?? 0 }}">
                         {{ $pinjam->nama_peminjam ?? '-' }} - {{ $pinjam->alat->nama_alat }} ({{ $pinjam->jumlah }}x)
                     </option>
                     @endforeach
@@ -324,6 +325,20 @@
                         <input type="number" name="kondisi_rusak" id="kondisi_rusak" min="0" value="0" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                     </div>
+
+                    <!-- Persen Kerusakan (muncul kalau kondisi_rusak > 0) -->
+                    <div id="persen_kerusakan_wrapper" class="hidden">
+                        <label class="text-xs text-gray-600">
+                            <i class="fas fa-percent text-orange-500 mr-1"></i>Persentase Kerusakan
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" name="persen_kerusakan" id="persen_kerusakan" min="0" max="100" value="0"
+                                class="w-full px-3 py-2 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                            <span class="text-sm text-gray-600 font-medium">%</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">0% = tidak ada denda, 100% = ganti penuh harga alat</p>
+                    </div>
+
                     <div>
                         <label class="text-xs text-gray-600">
                             <i class="fas fa-times text-red-600 mr-1"></i>Hilang
@@ -333,8 +348,32 @@
                     </div>
                 </div>
                 <p id="total_kembali" class="text-xs text-blue-600 mt-2 font-semibold"></p>
-                <!-- ✅ TAMBAH: Error message jika validation gagal -->
+
+                <!-- Rincian Denda -->
+                <div id="rincian_denda" class="hidden mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs space-y-1">
+                    <p class="font-semibold text-orange-700 mb-2">Estimasi Denda:</p>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Keterlambatan:</span>
+                        <span id="rincian_keterlambatan" class="font-medium">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Kerusakan:</span>
+                        <span id="rincian_kerusakan" class="font-medium">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Kehilangan:</span>
+                        <span id="rincian_kehilangan" class="font-medium">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-orange-700 border-t border-orange-300 pt-1 mt-1">
+                        <span>Total Denda:</span>
+                        <span id="rincian_total">Rp 0</span>
+                    </div>
+                </div>
+
                 @error('kondisi_baik')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+                @error('persen_kerusakan')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -444,6 +483,9 @@
         document.getElementById('kondisi_baik').value = 0;
         document.getElementById('kondisi_rusak').value = 0;
         document.getElementById('kondisi_hilang').value = 0;
+        document.getElementById('persen_kerusakan').value = 0;
+        document.getElementById('persen_kerusakan_wrapper').classList.add('hidden');
+        document.getElementById('rincian_denda').classList.add('hidden');
         document.getElementById('total_kembali').textContent = '';
         document.getElementById('info_peminjaman').textContent = '';
         document.getElementById('info_keterlambatan').textContent = '';
@@ -453,28 +495,64 @@
     const kondisiBaik = document.getElementById('kondisi_baik');
     const kondisiRusak = document.getElementById('kondisi_rusak');
     const kondisiHilang = document.getElementById('kondisi_hilang');
+    const persenKerusakan = document.getElementById('persen_kerusakan');
     const totalKembaliText = document.getElementById('total_kembali');
     const infoPeminjaman = document.getElementById('info_peminjaman');
     const submitBtn = document.getElementById('submitBtn');
+    const tarifDenda = {{ $tarifDenda ?? 5000 }};
+
+    function formatRupiah(angka) {
+        return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
+    }
 
     function updateKondisiInfo() {
         const selected = peminjamanSelect.options[peminjamanSelect.selectedIndex];
         const jumlahPinjam = parseInt(selected.getAttribute('data-jumlah')) || 0;
-        
-        if (!selected.getAttribute('data-user')) return; // Skip jika placeholder
-        
-        // Display peminjaman info
+        const hargaAlat = parseInt(selected.getAttribute('data-harga')) || 0;
+
+        if (!selected.getAttribute('data-user')) return;
+
         const user = selected.getAttribute('data-user');
         const alat = selected.getAttribute('data-alat');
         infoPeminjaman.textContent = `${user} - ${alat} (${jumlahPinjam}x)`;
-        
-        // Calculate total kembali
+
         const baik = parseInt(kondisiBaik.value) || 0;
         const rusak = parseInt(kondisiRusak.value) || 0;
         const hilang = parseInt(kondisiHilang.value) || 0;
+        const persen = parseInt(persenKerusakan.value) || 0;
         const total = baik + rusak + hilang;
 
-        // VALIDASI & ENABLE/DISABLE SUBMIT
+        // Tampilkan/hide input persen kerusakan
+        if (rusak > 0) {
+            document.getElementById('persen_kerusakan_wrapper').classList.remove('hidden');
+        } else {
+            document.getElementById('persen_kerusakan_wrapper').classList.add('hidden');
+            persenKerusakan.value = 0;
+        }
+
+        // Hitung keterlambatan
+        const tglKembali = new Date(document.getElementById('tanggal_kembali').value);
+        const jatuhTempo = new Date(selected.getAttribute('data-jatuh-tempo'));
+        const diffDays = Math.max(0, Math.floor((tglKembali - jatuhTempo) / (1000 * 60 * 60 * 24)));
+
+        // Hitung denda
+        const dendaKeterlambatan = diffDays * tarifDenda * total;
+        const dendaKerusakan = hargaAlat * (persen / 100) * rusak;
+        const dendaKehilangan = hargaAlat * hilang;
+        const totalDenda = dendaKeterlambatan + dendaKerusakan + dendaKehilangan;
+
+        // Tampilkan rincian denda
+        if (total > 0 && (dendaKeterlambatan > 0 || dendaKerusakan > 0 || dendaKehilangan > 0)) {
+            document.getElementById('rincian_denda').classList.remove('hidden');
+            document.getElementById('rincian_keterlambatan').textContent = formatRupiah(dendaKeterlambatan);
+            document.getElementById('rincian_kerusakan').textContent = formatRupiah(dendaKerusakan);
+            document.getElementById('rincian_kehilangan').textContent = formatRupiah(dendaKehilangan);
+            document.getElementById('rincian_total').textContent = formatRupiah(totalDenda);
+        } else {
+            document.getElementById('rincian_denda').classList.add('hidden');
+        }
+
+        // Validasi total
         let isValid = true;
         if (total > jumlahPinjam && jumlahPinjam > 0) {
             totalKembaliText.innerHTML = `<span class="text-red-600 font-semibold">❌ Total (${total}) melebihi jumlah pinjam (${jumlahPinjam})</span>`;
@@ -490,7 +568,6 @@
             isValid = false;
         }
 
-        // Enable/disable submit button
         submitBtn.disabled = !isValid || jumlahPinjam === 0;
     }
 
@@ -498,6 +575,8 @@
     kondisiBaik.addEventListener('input', updateKondisiInfo);
     kondisiRusak.addEventListener('input', updateKondisiInfo);
     kondisiHilang.addEventListener('input', updateKondisiInfo);
+    persenKerusakan.addEventListener('input', updateKondisiInfo);
+    document.getElementById('tanggal_kembali').addEventListener('change', updateKondisiInfo);
 
     // ✅ FIX: Prevent modal click from blocking tab buttons
     document.getElementById('pengembalianModal').addEventListener('click', function(event) {
